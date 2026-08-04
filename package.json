@@ -1,6 +1,6 @@
 {
   "name": "tailwind-firstdraft-css",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Customized Tailwind stylesheet for First Draft projects: classless styles + named components, gated behind body.appdev-style",
   "repository": {
     "type": "git",
