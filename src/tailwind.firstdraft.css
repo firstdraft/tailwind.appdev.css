@@ -1346,6 +1346,10 @@
     list-style: none;
   }
 
+  body.appdev-style .dropdown-menu.show {
+    display: block;
+  }
+
   body.appdev-style .dropdown-menu li {
     margin: 0;
   }
