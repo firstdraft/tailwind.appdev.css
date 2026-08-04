@@ -1,0 +1,1390 @@
+/* ================================================
+   TAILWIND.FIRSTDRAFT.CSS  (source)
+
+   A drop-in replacement for the Pico CSS stack:
+   named components + classless styling for semantic
+   HTML, built on Tailwind's default design tokens.
+
+   Sources live in src/: this stylesheet plus a
+   generated tailwind.theme.css (Tailwind's full
+   default theme as CSS variables). bin/build bakes
+   the theme in where the @import sits, producing
+   the single-file artifact at the repo root — the
+   file apps actually link.
+
+   Meant to be used alongside the Tailwind browser
+   build (which supplies Preflight + utility classes):
+
+     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3"></script>
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/firstdraft/tailwind.firstdraft.css@latest/tailwind.firstdraft.css">
+
+   The theme variables are required: the browser build
+   tree-shakes its theme, emitting only the variables
+   its utility classes actually use, so without them
+   every var() below resolves to nothing. (They play
+   the role bootstrap-utilities.css played in the old
+   stack, supplying the --bs-* variables that
+   pico.firstdraft.css consumed.)
+
+   GATING: nothing here applies until you add
+   class="appdev-style" to your <body> — just like Pico's
+   conditional stylesheet needed class="pico". Without
+   it, pages get Tailwind's Preflight and utility
+   classes only.
+
+   Everything lives in the `components` cascade layer
+   so that Tailwind utility classes in your HTML
+   always win over these defaults.
+=================================================== */
+
+@layer theme, base, components, utilities;
+
+/* Tailwind's full default theme as CSS variables. In this source file it is
+   a separate generated file pulled in via @import (a @layer statement is the
+   one kind of rule the CSS spec allows before @import); bin/build replaces
+   this line with the file's contents to produce the single-file artifact. */
+@import url("tailwind.theme.css");
+
+@layer components {
+
+  /* ================================================
+     DESIGN TOKENS
+
+     Two tiers:
+
+       1. Tailwind's own theme variables — --color-*,
+          --text-*, --font-weight-*, --radius-*,
+          --shadow-*, --leading-*, --spacing — are the
+          source of truth, defined in the companion
+          tailwind.theme.css. Referencing them (rather
+          than copying their values) keeps this
+          stylesheet in lockstep with the utility
+          classes students write in their HTML, and
+          means retheming one rethemes both.
+
+       2. The --fd-* tokens below name those values for
+          the roles this stylesheet plays. Every rule
+          further down references a --fd-* token or a
+          Tailwind variable, never a raw literal — so
+          retheming means editing this block only.
+
+     Custom properties only — these produce no visible
+     styling on their own, so they stay unscoped.
+  =================================================== */
+
+  :root {
+    /* Neutrals — Tailwind's zinc ramp */
+    --fd-gray-50:  var(--color-zinc-50);
+    --fd-gray-100: var(--color-zinc-100);
+    --fd-gray-200: var(--color-zinc-200);
+    --fd-gray-300: var(--color-zinc-300);
+    --fd-gray-400: var(--color-zinc-400);
+    --fd-gray-500: var(--color-zinc-500);
+    --fd-gray-600: var(--color-zinc-600);
+    --fd-gray-700: var(--color-zinc-700);
+    --fd-gray-800: var(--color-zinc-800);
+    --fd-gray-900: var(--color-zinc-900);
+
+    --fd-surface:    var(--color-white); /* cards, inputs, menus, header */
+    --fd-on-primary: var(--color-white); /* text on a filled accent background */
+
+    /* Accent */
+    --fd-primary:       var(--color-blue-600);
+    --fd-primary-hover: var(--color-blue-700);
+    --fd-primary-faint: var(--color-blue-50);
+
+    /* Feedback */
+    --fd-danger:         var(--color-red-600);
+    --fd-danger-faint:   var(--color-red-50);
+    --fd-danger-border:  var(--color-red-200);
+    --fd-danger-text:    var(--color-red-800);
+    --fd-success:        var(--color-green-600);
+    --fd-success-faint:  var(--color-green-50);
+    --fd-success-border: var(--color-green-200);
+    --fd-success-text:   var(--color-green-800);
+
+    /* Modal scrim — always dark, so it does not flip with the theme */
+    --fd-backdrop: color-mix(in oklab, var(--color-zinc-900) 60%, transparent);
+
+    /* Focus rings, derived from the accent so they follow it into dark mode */
+    --fd-ring:        0 0 0 3px color-mix(in oklab, var(--fd-primary) 15%, transparent);
+    --fd-ring-danger: 0 0 0 3px color-mix(in oklab, var(--fd-danger) 15%, transparent);
+
+    /* Radii — named by role rather than by size, because Tailwind
+       renumbered the scale in v4 (what v3 called rounded-sm is now
+       rounded-xs), so a size name here would invite mismatches */
+    --fd-radius-card:    var(--radius-lg); /* rounded-lg */
+    --fd-radius-control: var(--radius-md); /* rounded-md */
+    --fd-radius-inline:  var(--radius-sm); /* rounded-sm */
+
+    /* Elevation. NB: Tailwind v4's --shadow-sm is heavier than v3's;
+       the hairline shadow we want is now --shadow-xs */
+    --fd-shadow-raised:  var(--shadow-xs);
+    --fd-shadow-overlay: var(--shadow-lg);
+    --fd-shadow-modal:   var(--shadow-xl);
+
+    /* Spacing. --spacing is Tailwind's 0.25rem base unit — the same
+       one p-4 / mb-6 / gap-2 are built from — so these line up
+       exactly with the utilities, and every measurement below stays
+       on that grid instead of drifting to arbitrary values. */
+    --fd-gutter:      calc(var(--spacing) * 4);  /* 1rem    — page/container side padding */
+    --fd-card-px:     calc(var(--spacing) * 5);  /* 1.25rem */
+    --fd-card-py:     calc(var(--spacing) * 5);  /* 1.25rem */
+    --fd-control-px:  calc(var(--spacing) * 3);  /* 0.75rem — buttons, inputs, nav links */
+    --fd-control-py:  calc(var(--spacing) * 2);  /* 0.5rem  */
+    --fd-stack-tight: calc(var(--spacing) * 3);  /* 0.75rem — headings to their body text */
+    --fd-stack:       calc(var(--spacing) * 4);  /* 1rem    — between flowing blocks */
+    --fd-stack-loose: calc(var(--spacing) * 6);  /* 1.5rem  — between cards */
+    --fd-section:     calc(var(--spacing) * 12); /* 3rem    — page top/bottom bands */
+  }
+
+  /* Dark theme: flip the gray ramp and swap surfaces. Activated by the
+     dark-mode Stimulus controller stamping data-theme="dark" on <html>.
+     Custom properties only — inert until the attribute is set.
+
+     Tailwind's own `dark:` variant keys off prefers-color-scheme, so it
+     will NOT follow this toggle unless the page also declares:
+
+       @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+     inside its <style type="text/tailwindcss"> block. */
+  [data-theme="dark"] {
+    color-scheme: dark; /* native form controls, scrollbars, backdrops */
+
+    --fd-gray-50:  var(--color-zinc-900);
+    --fd-gray-100: var(--color-zinc-700);
+    --fd-gray-200: var(--color-zinc-700);
+    --fd-gray-300: var(--color-zinc-600);
+    --fd-gray-400: var(--color-zinc-500);
+    --fd-gray-500: var(--color-zinc-400);
+    --fd-gray-600: var(--color-zinc-300);
+    --fd-gray-700: var(--color-zinc-200);
+    --fd-gray-800: var(--color-zinc-100);
+    --fd-gray-900: var(--color-zinc-50);
+
+    --fd-surface: var(--color-zinc-800);
+
+    --fd-primary:       var(--color-blue-500); /* better contrast on dark */
+    --fd-primary-hover: var(--color-blue-400);
+    --fd-primary-faint: color-mix(in oklab, var(--color-blue-500) 15%, transparent);
+  }
+
+  /* ================================================
+     PAGE STRUCTURE (sticky footer)
+  =================================================== */
+
+  body.appdev-style {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--fd-gray-50);
+    color: var(--fd-gray-800);
+  }
+
+  body.appdev-style > header {
+    background-color: var(--fd-surface);
+    border-bottom: 1px solid var(--fd-gray-200);
+  }
+
+  body.appdev-style > main {
+    flex: 1;
+    padding-top: var(--fd-stack-loose);
+    padding-bottom: var(--fd-section);
+  }
+
+  body.appdev-style > footer {
+    margin-top: auto;
+    padding-top: var(--fd-section);
+    padding-bottom: var(--fd-section);
+    background-color: var(--fd-gray-200);
+    border-top: 1px solid var(--fd-gray-300);
+    color: var(--fd-gray-600);
+    font-size: var(--text-sm);
+  }
+
+  body.appdev-style > footer a {
+    color: var(--fd-gray-700);
+    text-decoration: none;
+  }
+
+  body.appdev-style > footer a:hover {
+    color: var(--fd-gray-900);
+    text-decoration: underline;
+  }
+
+  /* ================================================
+     CONTAINERS
+  =================================================== */
+
+  /* Full-width responsive container. (When the Tailwind browser build is
+     active, its own `container` utility supplies max-widths per breakpoint;
+     these centering/padding rules compose with it.) */
+  body.appdev-style .container {
+    width: 100%;
+    max-width: var(--container-7xl);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--fd-gutter);
+    padding-right: var(--fd-gutter);
+  }
+
+  body.appdev-style .container-half,
+  body.appdev-style .container-two-thirds {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--fd-gutter);
+    padding-right: var(--fd-gutter);
+  }
+
+  /* Breakpoints are written in rem to match Tailwind's own --breakpoint-*
+     values (md/lg/xl/2xl), so these containers step at the same widths as
+     the md: / lg: / xl: / 2xl: variants. Media queries can't read var(),
+     so the numbers are spelled out. */
+  @media (width >= 48rem) { /* --breakpoint-md */
+    body.appdev-style .container-half        { max-width: 350px; }
+    body.appdev-style .container-two-thirds  { max-width: 467px; }
+  }
+
+  @media (width >= 64rem) { /* --breakpoint-lg */
+    body.appdev-style .container-half        { max-width: 475px; }
+    body.appdev-style .container-two-thirds  { max-width: 633px; }
+  }
+
+  @media (width >= 80rem) { /* --breakpoint-xl */
+    body.appdev-style .container-half        { max-width: 600px; }
+    body.appdev-style .container-two-thirds  { max-width: 800px; }
+  }
+
+  @media (width >= 96rem) { /* --breakpoint-2xl */
+    body.appdev-style .container-half        { max-width: 725px; }
+    body.appdev-style .container-two-thirds  { max-width: 967px; }
+  }
+
+  /* ================================================
+     TYPOGRAPHY
+  =================================================== */
+
+  body.appdev-style h1,
+  body.appdev-style h2,
+  body.appdev-style h3,
+  body.appdev-style h4,
+  body.appdev-style h5,
+  body.appdev-style h6 {
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-tight);
+    color: var(--fd-gray-900);
+    margin-bottom: var(--fd-stack-tight);
+  }
+
+  body.appdev-style h1 { font-size: var(--text-3xl); }
+  body.appdev-style h2 { font-size: var(--text-2xl); }
+  body.appdev-style h3 { font-size: var(--text-xl); }
+  body.appdev-style h4 { font-size: var(--text-lg); }
+
+  body.appdev-style p {
+    margin-bottom: var(--fd-stack);
+  }
+
+  body.appdev-style main a {
+    color: var(--fd-primary);
+    text-decoration: none;
+  }
+
+  body.appdev-style main a:hover {
+    text-decoration: underline;
+  }
+
+  /* Bulleted lists in flowing content (cards, navs, and
+     breadcrumbs override this further down) */
+  body.appdev-style main ul {
+    list-style: disc;
+    padding-left: var(--fd-stack-loose);
+    margin-bottom: var(--fd-stack);
+  }
+
+  body.appdev-style main ul ul {
+    list-style: circle;
+    margin-top: calc(var(--spacing) * 1);
+    margin-bottom: 0;
+  }
+
+  body.appdev-style main li {
+    margin-bottom: calc(var(--spacing) * 1);
+  }
+
+  body.appdev-style hr {
+    border: 0;
+    border-top: 1px solid var(--fd-gray-200);
+    margin: calc(var(--spacing) * 8) 0;
+  }
+
+  body.appdev-style code {
+    background-color: var(--fd-gray-100);
+    border: 1px solid var(--fd-gray-200);
+    border-radius: var(--fd-radius-inline);
+    padding: calc(var(--spacing) * 0.5) calc(var(--spacing) * 1.5);
+    font-size: 0.875em; /* em, so inline code tracks its surrounding text */
+  }
+
+  body.appdev-style pre {
+    background-color: var(--fd-gray-100);
+    border: 1px solid var(--fd-gray-200);
+    border-radius: var(--fd-radius-control);
+    padding: var(--fd-stack);
+    overflow-x: auto;
+    margin-bottom: var(--fd-stack);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+  }
+
+  body.appdev-style pre code {
+    background-color: transparent;
+    border: 0;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  body.appdev-style figure {
+    margin-bottom: var(--fd-stack);
+  }
+
+  /* Description lists — bold terms, tight spacing */
+  body.appdev-style dt {
+    font-weight: var(--font-weight-semibold);
+    color: var(--fd-gray-900);
+  }
+
+  body.appdev-style dd {
+    margin: 0 0 var(--fd-stack-tight);
+  }
+
+  body.appdev-style dd > p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* ================================================
+     NAVBAR  (body > header > ... > nav)
+  =================================================== */
+
+  body.appdev-style > header nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: calc(var(--spacing) * 14); /* 3.5rem */
+  }
+
+  body.appdev-style > header nav ul {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing) * 1);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* The links' own padding (for the hover pill) would push their text
+     inward; pull the outer edges back so the navbar text lines up with
+     the page content */
+  body.appdev-style > header nav > ul:first-child {
+    margin-left: calc(var(--fd-control-px) * -1);
+  }
+
+  body.appdev-style > header nav > ul:last-child {
+    margin-right: calc(var(--fd-control-px) * -1);
+  }
+
+  body.appdev-style > header nav li {
+    margin: 0;
+  }
+
+  body.appdev-style > header nav a {
+    display: block;
+    padding: var(--fd-control-py) var(--fd-control-px);
+    border-radius: var(--fd-radius-control);
+    color: var(--fd-gray-600);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+  }
+
+  body.appdev-style > header nav a:hover {
+    color: var(--fd-gray-900);
+    background-color: var(--fd-gray-100);
+  }
+
+  body.appdev-style > header nav strong a {
+    color: var(--fd-gray-900);
+    font-weight: var(--font-weight-bold);
+  }
+
+  /* Secondary horizontal navs inside the page (e.g. admin
+     section nav) */
+  body.appdev-style main nav:not([aria-label="breadcrumb"], .pagy) ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--spacing) * 1);
+    list-style: none;
+    margin: 0 0 calc(var(--spacing) * 2) calc(var(--fd-control-px) * -1);
+    padding: 0;
+  }
+
+  body.appdev-style main nav:not([aria-label="breadcrumb"], .pagy) li {
+    margin: 0;
+  }
+
+  body.appdev-style main nav:not([aria-label="breadcrumb"], .pagy) a {
+    display: block;
+    padding: calc(var(--spacing) * 1.5) var(--fd-control-px);
+    border-radius: var(--fd-radius-control);
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  body.appdev-style main nav:not([aria-label="breadcrumb"], .pagy) a:hover {
+    background-color: var(--fd-gray-100);
+    text-decoration: none;
+  }
+
+  /* ================================================
+     BREADCRUMBS
+  =================================================== */
+
+  body.appdev-style nav[aria-label="breadcrumb"] ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    list-style: none;
+    margin: 0 0 var(--fd-stack);
+    padding: 0;
+    font-size: var(--text-sm);
+    color: var(--fd-gray-500);
+  }
+
+  body.appdev-style nav[aria-label="breadcrumb"] li {
+    margin: 0;
+  }
+
+  body.appdev-style nav[aria-label="breadcrumb"] li + li::before {
+    content: "›";
+    margin: 0 calc(var(--spacing) * 2);
+    color: var(--fd-gray-400);
+  }
+
+  /* ================================================
+     CARDS  (<article>)
+  =================================================== */
+
+  body.appdev-style article {
+    background-color: var(--fd-surface);
+    border: 1px solid var(--fd-gray-200);
+    border-radius: var(--fd-radius-card);
+    box-shadow: var(--fd-shadow-raised);
+    padding: var(--fd-card-py) var(--fd-card-px);
+    margin-bottom: var(--fd-stack-loose);
+  }
+
+  body.appdev-style article > :last-child {
+    margin-bottom: 0;
+  }
+
+  /* Card header strip */
+  body.appdev-style article > header {
+    margin: calc(var(--fd-card-py) * -1) calc(var(--fd-card-px) * -1) var(--fd-card-py);
+    padding: calc(var(--spacing) * 3.5) var(--fd-card-px);
+    background-color: var(--fd-gray-50);
+    border-bottom: 1px solid var(--fd-gray-200);
+    border-radius: calc(var(--fd-radius-card) - 1px) calc(var(--fd-radius-card) - 1px) 0 0;
+  }
+
+  body.appdev-style article > header :is(h1, h2, h3, h4, h5, h6) {
+    margin: 0;
+  }
+
+  body.appdev-style article > header > :last-child {
+    margin-bottom: 0;
+  }
+
+  /* When a flush list group directly follows the card header, close the
+     gap so the header sits flush against the first list item */
+  body.appdev-style article > header:has(+ ul) {
+    margin-bottom: 0;
+  }
+
+  /* Flush list group — a <ul> that is a direct child of a card */
+  body.appdev-style article > ul {
+    list-style: none;
+    margin: 0 calc(var(--fd-card-px) * -1);
+    padding: 0;
+  }
+
+  body.appdev-style article > ul > li {
+    margin: 0;
+    padding: var(--fd-stack-tight) var(--fd-card-px);
+    border-bottom: 1px solid var(--fd-gray-200);
+  }
+
+  body.appdev-style article > ul > li:first-child {
+    border-top: 1px solid var(--fd-gray-200);
+  }
+
+  /* The card header's own border already divides it from the first item */
+  body.appdev-style article > header + ul > li:first-child {
+    border-top: 0;
+  }
+
+  body.appdev-style article > ul > li > :last-child {
+    margin-bottom: 0;
+  }
+
+  /* List group action items — a list item whose only content
+     is a single link becomes fully clickable */
+  body.appdev-style article > ul > li:has(> a:only-child) {
+    padding: 0;
+  }
+
+  body.appdev-style article > ul > li > a:only-child {
+    display: flex;
+    align-items: center;
+    gap: var(--fd-stack);
+    padding: var(--fd-stack-tight) var(--fd-card-px);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  body.appdev-style article > ul > li > a:only-child img {
+    flex-shrink: 0;
+    border-radius: var(--fd-radius-control);
+  }
+
+  body.appdev-style article > ul > li > a:only-child::after {
+    content: "›";
+    font-size: var(--text-2xl);
+    line-height: 1;
+    color: var(--fd-gray-400);
+    margin-left: auto;
+  }
+
+  body.appdev-style article > ul > li > a:only-child:hover,
+  body.appdev-style article > ul > li > a:only-child[aria-current="page"] {
+    background-color: var(--fd-primary-faint);
+    color: var(--fd-primary-hover);
+  }
+
+  body.appdev-style article > ul > li > a:only-child:hover::after,
+  body.appdev-style article > ul > li > a:only-child[aria-current="page"]::after {
+    color: var(--fd-primary-hover);
+  }
+
+  /* ================================================
+     TABLES
+  =================================================== */
+
+  body.appdev-style table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--fd-stack);
+  }
+
+  body.appdev-style th {
+    text-align: left;
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--text-sm);
+    color: var(--fd-gray-600);
+    padding: var(--fd-stack-tight) var(--fd-stack);
+    border-bottom: 1px solid var(--fd-gray-300);
+    background-color: var(--fd-gray-50);
+  }
+
+  body.appdev-style td {
+    padding: var(--fd-stack-tight) var(--fd-stack);
+    border-bottom: 1px solid var(--fd-gray-200);
+  }
+
+  body.appdev-style th a {
+    color: inherit;
+  }
+
+  /* Flush tables inside cards */
+  body.appdev-style article > table,
+  body.appdev-style article > .overflow-auto {
+    margin-left: calc(var(--fd-card-px) * -1);
+    margin-right: calc(var(--fd-card-px) * -1);
+  }
+
+  body.appdev-style article > table {
+    width: calc(100% + var(--fd-card-px) * 2);
+  }
+
+  body.appdev-style article :is(th, td):first-child {
+    padding-left: var(--fd-card-px);
+  }
+
+  body.appdev-style article :is(th, td):last-child {
+    padding-right: var(--fd-card-px);
+  }
+
+  /* ================================================
+     FORMS
+  =================================================== */
+
+  body.appdev-style label,
+  body.appdev-style legend {
+    display: block;
+    font-weight: var(--font-weight-medium);
+    font-size: var(--text-sm);
+    color: var(--fd-gray-700);
+    margin-bottom: calc(var(--spacing) * 1.5);
+  }
+
+  /* The :not() list is wrapped in :where() so it adds no specificity —
+     named components like .form-control can override these defaults */
+  body.appdev-style input:where(:not([type="checkbox"], [type="radio"], [type="submit"], [type="button"])),
+  body.appdev-style select,
+  body.appdev-style textarea {
+    display: block;
+    width: 100%;
+    padding: var(--fd-control-py) var(--fd-control-px);
+    background-color: var(--fd-surface);
+    border: 1px solid var(--fd-gray-300);
+    border-radius: var(--fd-radius-control);
+    box-shadow: var(--fd-shadow-raised);
+    margin-bottom: var(--fd-stack);
+  }
+
+  body.appdev-style input:where(:not([type="checkbox"], [type="radio"], [type="submit"], [type="button"])):focus,
+  body.appdev-style select:focus,
+  body.appdev-style textarea:focus {
+    outline: none;
+    border-color: var(--fd-primary);
+    box-shadow: var(--fd-ring);
+  }
+
+  body.appdev-style ::placeholder {
+    color: var(--fd-gray-400);
+  }
+
+  body.appdev-style input[type="checkbox"],
+  body.appdev-style input[type="radio"] {
+    width: calc(var(--spacing) * 4);
+    height: calc(var(--spacing) * 4);
+    accent-color: var(--fd-primary);
+    margin-right: calc(var(--spacing) * 1);
+  }
+
+  /* Labels that sit next to a checkbox or radio stay inline */
+  body.appdev-style input[type="checkbox"] + label,
+  body.appdev-style input[type="radio"] + label,
+  body.appdev-style label:has(> input[type="checkbox"]),
+  body.appdev-style label:has(> input[type="radio"]) {
+    display: inline-block;
+    font-weight: var(--font-weight-normal);
+    font-size: var(--text-base);
+    color: inherit;
+    margin-right: var(--fd-stack);
+  }
+
+  body.appdev-style fieldset {
+    border: 0;
+    margin: 0 0 var(--fd-stack);
+    padding: 0;
+    min-width: 0;
+  }
+
+  /* Collapsible sections (e.g. filter forms) */
+  body.appdev-style summary {
+    cursor: pointer;
+    font-weight: var(--font-weight-medium);
+    color: var(--fd-gray-700);
+  }
+
+  body.appdev-style summary:hover {
+    color: var(--fd-gray-900);
+  }
+
+  body.appdev-style details[open] > summary {
+    margin-bottom: var(--fd-stack);
+  }
+
+  /* ================================================
+     BUTTONS
+  =================================================== */
+
+  body.appdev-style button,
+  body.appdev-style input[type="submit"],
+  body.appdev-style input[type="button"],
+  body.appdev-style .btn {
+    display: inline-block;
+    padding: var(--fd-control-py) var(--fd-stack);
+    background-color: var(--fd-primary);
+    color: var(--fd-on-primary);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--text-base);
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid transparent;
+    border-radius: var(--fd-radius-control);
+    box-shadow: var(--fd-shadow-raised);
+    cursor: pointer;
+  }
+
+  body.appdev-style button:hover,
+  body.appdev-style input[type="submit"]:hover,
+  body.appdev-style input[type="button"]:hover,
+  body.appdev-style .btn:hover {
+    background-color: var(--fd-primary-hover);
+  }
+
+  body.appdev-style main a.btn:hover {
+    text-decoration: none;
+  }
+
+  /* Submit buttons span the full width of their form */
+  body.appdev-style form button[type="submit"],
+  body.appdev-style form input[type="submit"] {
+    width: 100%;
+  }
+
+  body.appdev-style .btn-outline {
+    background-color: var(--fd-surface);
+    color: var(--fd-gray-700);
+    border-color: var(--fd-gray-300);
+  }
+
+  body.appdev-style .btn-outline:hover {
+    background-color: var(--fd-gray-100);
+    color: var(--fd-gray-900);
+  }
+
+  /* ================================================
+     MODALS  (native <dialog> + modal Stimulus controller)
+
+     Expected structure:
+       <div data-controller="modal">
+         <button data-action="click->modal#open">Open</button>
+         <dialog data-modal-target="dialog">
+           <article> ... card content ... </article>
+         </dialog>
+       </div>
+
+     The <article> inside picks up the regular card styling;
+     these rules handle sizing, the backdrop, the close (X)
+     button, and open/close animations driven by the
+     modal-is-open/-opening/-closing classes the controller
+     toggles on <html>.
+  =================================================== */
+
+  /* Lock page scrolling while a modal is open */
+  html.modal-is-open:has(body.appdev-style) {
+    overflow: hidden;
+  }
+
+  body.appdev-style dialog {
+    width: calc(100% - var(--spacing) * 8);
+    max-width: var(--container-lg);
+    margin: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  body.appdev-style dialog::backdrop {
+    background-color: var(--fd-backdrop);
+  }
+
+  body.appdev-style dialog > article {
+    margin: 0;
+    max-height: calc(100dvh - var(--spacing) * 16);
+    overflow-y: auto;
+    box-shadow: var(--fd-shadow-modal);
+  }
+
+  /* The close (X) button: an empty <button aria-label="Close">
+     in the card header */
+  body.appdev-style dialog button[aria-label="Close"] {
+    float: right;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--spacing) * 7);  /* 1.75rem */
+    height: calc(var(--spacing) * 7);
+    margin: 0 0 0 calc(var(--spacing) * 2);
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: var(--fd-radius-control);
+    box-shadow: none;
+    color: var(--fd-gray-500);
+    font-size: var(--text-2xl);
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  body.appdev-style dialog button[aria-label="Close"]::before {
+    content: "\00d7"; /* × */
+  }
+
+  body.appdev-style dialog button[aria-label="Close"]:hover {
+    background-color: var(--fd-gray-200);
+    color: var(--fd-gray-900);
+  }
+
+  /* Action buttons (Close/Cancel/Confirm) that follow other modal
+     content get breathing room above them. (Buttons are inline-block,
+     so this margin doesn't collapse with the preceding element's.) */
+  body.appdev-style dialog article * + button {
+    margin-top: var(--fd-stack);
+  }
+
+  /* A full-width content hr reads as a footer divider inside a modal;
+     tighten its margins to fit the card */
+  body.appdev-style dialog article hr {
+    margin: var(--fd-stack) 0;
+  }
+
+  /* Open/close animations (the controller adds these classes
+     to <html> and waits for the animation before closing) */
+  html.modal-is-opening body.appdev-style dialog[open] {
+    animation: fd-modal-pop 0.2s ease-out;
+  }
+
+  html.modal-is-opening body.appdev-style dialog[open]::backdrop {
+    animation: fd-modal-fade 0.2s ease-out;
+  }
+
+  html.modal-is-closing body.appdev-style dialog[open] {
+    animation: fd-modal-pop 0.2s ease-in reverse forwards;
+  }
+
+  html.modal-is-closing body.appdev-style dialog[open]::backdrop {
+    animation: fd-modal-fade 0.2s ease-in reverse forwards;
+  }
+
+  @keyframes fd-modal-fade {
+    from { opacity: 0; }
+  }
+
+  @keyframes fd-modal-pop {
+    from {
+      opacity: 0;
+      transform: translateY(calc(var(--spacing) * -3)) scale(0.98);
+    }
+  }
+
+  /* ================================================
+     PAGINATION  (Pagy series_nav)
+  =================================================== */
+
+  body.appdev-style nav.pagy {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--fd-stack-loose);
+  }
+
+  body.appdev-style nav.pagy a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: calc(var(--spacing) * 10); /* 2.5rem */
+    height: calc(var(--spacing) * 10);
+    padding: calc(var(--spacing) * 1.5) var(--fd-control-px);
+    margin-left: -1px;
+    background-color: var(--fd-surface);
+    border: 1px solid var(--fd-gray-300);
+    color: var(--fd-primary);
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+
+  body.appdev-style nav.pagy a:first-child {
+    margin-left: 0;
+    border-top-left-radius: var(--fd-radius-control);
+    border-bottom-left-radius: var(--fd-radius-control);
+  }
+
+  body.appdev-style nav.pagy a:last-child {
+    border-top-right-radius: var(--fd-radius-control);
+    border-bottom-right-radius: var(--fd-radius-control);
+  }
+
+  body.appdev-style nav.pagy a[href]:hover {
+    z-index: 2;
+    position: relative;
+    background-color: var(--fd-gray-100);
+  }
+
+  /* Current page */
+  body.appdev-style nav.pagy a[aria-current="page"] {
+    z-index: 3;
+    position: relative;
+    background-color: var(--fd-primary);
+    border-color: var(--fd-primary);
+    color: var(--fd-on-primary);
+    cursor: default;
+  }
+
+  /* Disabled prev/next and gap separators */
+  body.appdev-style nav.pagy a[aria-disabled="true"]:not([aria-current="page"]) {
+    color: var(--fd-gray-400);
+    cursor: not-allowed;
+  }
+
+  /* ================================================
+     INDUSTRIAL COMPONENTS (Bootstrap-feel)
+
+     Named components with Bootstrap-familiar names for
+     the later, "industrial-grade" phase of the course.
+     Layout and one-off styling come from Tailwind
+     utilities; these cover the recurring patterns.
+  =================================================== */
+
+  /* --- Position & layout helpers (Bootstrap names) --- */
+
+  body.appdev-style .container-fluid {
+    width: 100%;
+    padding-left: var(--fd-gutter);
+    padding-right: var(--fd-gutter);
+  }
+
+  body.appdev-style .fixed-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+  }
+
+  body.appdev-style .fixed-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+  }
+
+  body.appdev-style .sticky-top {
+    position: sticky;
+    top: var(--fd-stack);
+  }
+
+  body.appdev-style .bg-body-tertiary {
+    background-color: var(--fd-gray-100);
+  }
+
+  body.appdev-style .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  body.appdev-style .icon-link {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--spacing) * 2);
+  }
+
+  /* --- Buttons --- */
+
+  body.appdev-style .btn-primary {
+    background-color: var(--fd-primary);
+    color: var(--fd-on-primary);
+  }
+
+  body.appdev-style .btn-primary:hover {
+    background-color: var(--fd-primary-hover);
+  }
+
+  body.appdev-style .btn-secondary {
+    background-color: var(--fd-gray-600);
+    color: var(--fd-on-primary);
+  }
+
+  body.appdev-style .btn-secondary:hover {
+    background-color: var(--fd-gray-700);
+  }
+
+  body.appdev-style .btn-outline-primary {
+    background-color: transparent;
+    color: var(--fd-primary);
+    border-color: var(--fd-primary);
+  }
+
+  body.appdev-style .btn-outline-primary:hover {
+    background-color: var(--fd-primary);
+    color: var(--fd-on-primary);
+  }
+
+  body.appdev-style .btn-outline-secondary {
+    background-color: var(--fd-surface);
+    color: var(--fd-gray-700);
+    border-color: var(--fd-gray-300);
+  }
+
+  body.appdev-style .btn-outline-secondary:hover {
+    background-color: var(--fd-gray-100);
+    color: var(--fd-gray-900);
+  }
+
+  /* Link-styled buttons (icon buttons, inline actions) */
+  body.appdev-style .btn-link {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--fd-primary);
+    font-weight: var(--font-weight-normal);
+    padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
+  }
+
+  body.appdev-style .btn-link:hover {
+    background-color: transparent;
+    color: var(--fd-primary-hover);
+  }
+
+  /* Dismiss (X) button for alerts and modals */
+  body.appdev-style .btn-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--spacing) * 7);  /* 1.75rem */
+    height: calc(var(--spacing) * 7);
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: var(--fd-radius-control);
+    box-shadow: none;
+    color: var(--fd-gray-500);
+    font-size: var(--text-2xl);
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  body.appdev-style .btn-close::before {
+    content: "\00d7"; /* × */
+  }
+
+  body.appdev-style .btn-close:hover {
+    background-color: var(--fd-gray-200);
+    color: var(--fd-gray-900);
+  }
+
+  /* Buttons with explicit component classes size to their content;
+     only classless submits span the form (the classless default above) */
+  body.appdev-style form button[type="submit"]:is(.btn, .nav-link) {
+    width: auto;
+  }
+
+  /* --- Forms --- */
+
+  body.appdev-style .form-group {
+    margin-bottom: var(--fd-stack);
+  }
+
+  body.appdev-style .form-control {
+    display: block;
+    width: 100%;
+    padding: var(--fd-control-py) var(--fd-control-px);
+    background-color: var(--fd-surface);
+    border: 1px solid var(--fd-gray-300);
+    border-radius: var(--fd-radius-control);
+    box-shadow: var(--fd-shadow-raised);
+    margin-bottom: 0;
+  }
+
+  body.appdev-style .form-control:focus {
+    outline: none;
+    border-color: var(--fd-primary);
+    box-shadow: var(--fd-ring);
+  }
+
+  body.appdev-style .form-text {
+    display: block;
+    margin-top: calc(var(--spacing) * 1);
+    font-size: var(--text-sm);
+    color: var(--fd-gray-500);
+  }
+
+  body.appdev-style .form-check {
+    display: block;
+  }
+
+  body.appdev-style .form-check-input {
+    margin-right: calc(var(--spacing) * 1);
+  }
+
+  body.appdev-style .form-check-label {
+    display: inline-block;
+    font-weight: var(--font-weight-normal);
+    font-size: var(--text-base);
+    color: inherit;
+  }
+
+  /* Validation states */
+  body.appdev-style .form-control.is-invalid {
+    border-color: var(--fd-danger);
+  }
+
+  body.appdev-style .form-control.is-invalid:focus {
+    box-shadow: var(--fd-ring-danger);
+  }
+
+  body.appdev-style .form-control.is-valid {
+    border-color: var(--fd-success);
+  }
+
+  body.appdev-style .invalid-feedback {
+    margin-top: calc(var(--spacing) * 1);
+    font-size: var(--text-sm);
+    color: var(--fd-danger);
+  }
+
+  /* --- Alerts --- */
+
+  body.appdev-style .alert {
+    position: relative;
+    padding: var(--fd-stack-tight) var(--fd-stack);
+    margin-bottom: var(--fd-stack);
+    border: 1px solid transparent;
+    border-radius: var(--fd-radius-control);
+  }
+
+  body.appdev-style .alert-success {
+    background-color: var(--fd-success-faint);
+    border-color: var(--fd-success-border);
+    color: var(--fd-success-text);
+  }
+
+  body.appdev-style .alert-danger {
+    background-color: var(--fd-danger-faint);
+    border-color: var(--fd-danger-border);
+    color: var(--fd-danger-text);
+  }
+
+  body.appdev-style .alert-dismissible {
+    padding-right: var(--fd-section);
+  }
+
+  body.appdev-style .alert .btn-close {
+    position: absolute;
+    top: 50%;
+    right: var(--fd-stack-tight);
+    transform: translateY(-50%);
+    color: inherit;
+  }
+
+  /* --- Badges --- */
+
+  body.appdev-style .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--spacing) * 1);
+    padding: 0.25em 0.5em; /* em, so badges scale with their context */
+    font-size: 0.75em;
+    font-weight: var(--font-weight-semibold);
+    line-height: 1;
+    border-radius: var(--fd-radius-control);
+  }
+
+  body.appdev-style .text-bg-secondary {
+    background-color: var(--fd-gray-500);
+    color: var(--fd-on-primary);
+  }
+
+  body.appdev-style .text-bg-light {
+    background-color: var(--fd-gray-100);
+    color: var(--fd-gray-900);
+    border: 1px solid var(--fd-gray-300);
+  }
+
+  /* --- List groups --- */
+
+  body.appdev-style .list-group {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  body.appdev-style .list-group-item {
+    padding: var(--fd-stack-tight) calc(var(--spacing) * 1);
+  }
+
+  body.appdev-style .list-group-flush > .list-group-item {
+    border-bottom: 1px solid var(--fd-gray-200);
+  }
+
+  body.appdev-style :is(.list-group-action, .list-group-action-item):hover {
+    background-color: var(--fd-gray-50);
+  }
+
+  /* --- Nav & tabs --- */
+
+  body.appdev-style .nav {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  body.appdev-style .nav-item {
+    margin: 0;
+  }
+
+  body.appdev-style .nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--fd-stack-tight);
+    width: auto;
+    padding: var(--fd-control-py) var(--fd-control-px);
+    background: transparent;
+    border: 0;
+    border-radius: var(--fd-radius-control);
+    box-shadow: none;
+    color: var(--fd-gray-700);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--text-base);
+    text-align: left;
+    text-decoration: none;
+  }
+
+  body.appdev-style .nav-link:hover {
+    background-color: var(--fd-gray-100);
+    color: var(--fd-gray-900);
+  }
+
+  /* Underline-style tab navigation */
+  body.appdev-style .nav-underline {
+    gap: var(--fd-stack);
+    border-bottom: 1px solid var(--fd-gray-200);
+  }
+
+  body.appdev-style .nav-underline .nav-link {
+    padding: var(--fd-control-py) calc(var(--spacing) * 1);
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    color: var(--fd-gray-500);
+  }
+
+  body.appdev-style .nav-underline .nav-link:hover {
+    background: transparent;
+    color: var(--fd-gray-900);
+  }
+
+  body.appdev-style .nav-underline .nav-link.active {
+    color: var(--fd-primary);
+    border-bottom-color: var(--fd-primary);
+  }
+
+  /* Tab panels: hidden by default, shown via the `active` class,
+     which the tabs Stimulus controller toggles */
+  body.appdev-style .tab-pane {
+    display: none;
+  }
+
+  body.appdev-style .tab-pane.active {
+    display: block;
+  }
+
+  /* --- Navbar --- */
+
+  body.appdev-style .navbar {
+    padding: var(--fd-control-py) 0;
+    background-color: var(--fd-gray-100);
+    border-bottom: 1px solid var(--fd-gray-200);
+  }
+
+  body.appdev-style .navbar > :is(.container, .container-fluid) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  body.appdev-style .navbar.fixed-bottom {
+    border-bottom: 0;
+    border-top: 1px solid var(--fd-gray-200);
+  }
+
+  body.appdev-style .navbar-brand {
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fd-gray-900);
+    text-decoration: none;
+  }
+
+  body.appdev-style .navbar-nav {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* --- Dropdowns --- */
+
+  body.appdev-style .dropdown {
+    position: relative;
+  }
+
+  /* Hidden by default, shown via the `show` class, which the
+     dropdown Stimulus controller toggles */
+  body.appdev-style .dropdown-menu {
+    display: none;
+    position: absolute;
+    z-index: 40;
+    min-width: calc(var(--spacing) * 44); /* 11rem */
+    margin-top: calc(var(--spacing) * 1);
+    padding: calc(var(--spacing) * 1.5) 0;
+    background-color: var(--fd-surface);
+    border: 1px solid var(--fd-gray-200);
+    border-radius: var(--fd-radius-control);
+    box-shadow: var(--fd-shadow-overlay);
+    list-style: none;
+  }
+
+  body.appdev-style .dropdown-menu li {
+    margin: 0;
+  }
+
+  body.appdev-style .dropdown-menu form {
+    margin: 0;
+  }
+
+  body.appdev-style .dropdown-item {
+    display: block;
+    width: 100%;
+    padding: calc(var(--spacing) * 1.5) var(--fd-stack);
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    color: var(--fd-gray-700);
+    font-weight: var(--font-weight-normal);
+    font-size: var(--text-base);
+    text-align: left;
+    text-decoration: none;
+  }
+
+  body.appdev-style .dropdown-item:hover {
+    background-color: var(--fd-gray-100);
+    color: var(--fd-gray-900);
+  }
+
+  /* --- Cards --- */
+
+  body.appdev-style .card {
+    background-color: var(--fd-surface);
+    border: 1px solid var(--fd-gray-200);
+    border-radius: var(--fd-radius-card);
+    box-shadow: var(--fd-shadow-raised);
+  }
+
+  body.appdev-style .card-body {
+    display: block;
+    padding: var(--fd-card-py) var(--fd-card-px);
+  }
+}
