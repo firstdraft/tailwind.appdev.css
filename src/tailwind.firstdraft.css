@@ -471,10 +471,26 @@
   }
 
   /* ================================================
-     CARDS  (<article>)
+     CARDS  (<article> or .card)
+
+     Two ways to write the same card, styled identically:
+
+       <article> ... </article>
+       <div class="card"> ... </div>
+
+     <article> keeps the classless story intact for hand-written
+     semantic HTML. .card is what generated markup emits, so a
+     student who wants to style a card themselves can delete one
+     word instead of opting out of the whole stylesheet.
+
+     Every selector below is therefore written twice. Do NOT collapse
+     the pairs into :is(article, .card) — :is() takes the highest
+     specificity in its list, which would silently promote the
+     <article> rules from 0,1,2 to 0,2,1.
   =================================================== */
 
-  body.appdev-style article {
+  body.appdev-style article,
+  body.appdev-style .card {
     background-color: var(--fd-surface);
     border: 1px solid var(--fd-gray-200);
     border-radius: var(--fd-radius-card);
@@ -483,12 +499,14 @@
     margin-bottom: var(--fd-stack-loose);
   }
 
-  body.appdev-style article > :last-child {
+  body.appdev-style article > :last-child,
+  body.appdev-style .card > :last-child {
     margin-bottom: 0;
   }
 
   /* Card header strip */
-  body.appdev-style article > header {
+  body.appdev-style article > header,
+  body.appdev-style .card > header {
     margin: calc(var(--fd-card-py) * -1) calc(var(--fd-card-px) * -1) var(--fd-card-py);
     padding: calc(var(--spacing) * 3.5) var(--fd-card-px);
     background-color: var(--fd-gray-50);
@@ -496,53 +514,63 @@
     border-radius: calc(var(--fd-radius-card) - 1px) calc(var(--fd-radius-card) - 1px) 0 0;
   }
 
-  body.appdev-style article > header :is(h1, h2, h3, h4, h5, h6) {
+  body.appdev-style article > header :is(h1, h2, h3, h4, h5, h6),
+  body.appdev-style .card > header :is(h1, h2, h3, h4, h5, h6) {
     margin: 0;
   }
 
-  body.appdev-style article > header > :last-child {
+  body.appdev-style article > header > :last-child,
+  body.appdev-style .card > header > :last-child {
     margin-bottom: 0;
   }
 
   /* When a flush list group directly follows the card header, close the
      gap so the header sits flush against the first list item */
-  body.appdev-style article > header:has(+ ul) {
+  body.appdev-style article > header:has(+ ul),
+  body.appdev-style .card > header:has(+ ul) {
     margin-bottom: 0;
   }
 
   /* Flush list group — a <ul> that is a direct child of a card */
-  body.appdev-style article > ul {
+  body.appdev-style article > ul,
+  body.appdev-style .card > ul {
     list-style: none;
     margin: 0 calc(var(--fd-card-px) * -1);
     padding: 0;
   }
 
-  body.appdev-style article > ul > li {
+  body.appdev-style article > ul > li,
+  body.appdev-style .card > ul > li {
     margin: 0;
     padding: var(--fd-stack-tight) var(--fd-card-px);
     border-bottom: 1px solid var(--fd-gray-200);
   }
 
-  body.appdev-style article > ul > li:first-child {
+  body.appdev-style article > ul > li:first-child,
+  body.appdev-style .card > ul > li:first-child {
     border-top: 1px solid var(--fd-gray-200);
   }
 
   /* The card header's own border already divides it from the first item */
-  body.appdev-style article > header + ul > li:first-child {
+  body.appdev-style article > header + ul > li:first-child,
+  body.appdev-style .card > header + ul > li:first-child {
     border-top: 0;
   }
 
-  body.appdev-style article > ul > li > :last-child {
+  body.appdev-style article > ul > li > :last-child,
+  body.appdev-style .card > ul > li > :last-child {
     margin-bottom: 0;
   }
 
   /* List group action items — a list item whose only content
      is a single link becomes fully clickable */
-  body.appdev-style article > ul > li:has(> a:only-child) {
+  body.appdev-style article > ul > li:has(> a:only-child),
+  body.appdev-style .card > ul > li:has(> a:only-child) {
     padding: 0;
   }
 
-  body.appdev-style article > ul > li > a:only-child {
+  body.appdev-style article > ul > li > a:only-child,
+  body.appdev-style .card > ul > li > a:only-child {
     display: flex;
     align-items: center;
     gap: var(--fd-stack);
@@ -551,12 +579,14 @@
     text-decoration: none;
   }
 
-  body.appdev-style article > ul > li > a:only-child img {
+  body.appdev-style article > ul > li > a:only-child img,
+  body.appdev-style .card > ul > li > a:only-child img {
     flex-shrink: 0;
     border-radius: var(--fd-radius-control);
   }
 
-  body.appdev-style article > ul > li > a:only-child::after {
+  body.appdev-style article > ul > li > a:only-child::after,
+  body.appdev-style .card > ul > li > a:only-child::after {
     content: "›";
     font-size: var(--text-2xl);
     line-height: 1;
@@ -565,13 +595,17 @@
   }
 
   body.appdev-style article > ul > li > a:only-child:hover,
-  body.appdev-style article > ul > li > a:only-child[aria-current="page"] {
+  body.appdev-style article > ul > li > a:only-child[aria-current="page"],
+  body.appdev-style .card > ul > li > a:only-child:hover,
+  body.appdev-style .card > ul > li > a:only-child[aria-current="page"] {
     background-color: var(--fd-primary-faint);
     color: var(--fd-primary-hover);
   }
 
   body.appdev-style article > ul > li > a:only-child:hover::after,
-  body.appdev-style article > ul > li > a:only-child[aria-current="page"]::after {
+  body.appdev-style article > ul > li > a:only-child[aria-current="page"]::after,
+  body.appdev-style .card > ul > li > a:only-child:hover::after,
+  body.appdev-style .card > ul > li > a:only-child[aria-current="page"]::after {
     color: var(--fd-primary-hover);
   }
 
@@ -606,20 +640,25 @@
 
   /* Flush tables inside cards */
   body.appdev-style article > table,
-  body.appdev-style article > .overflow-auto {
+  body.appdev-style article > .overflow-auto,
+  body.appdev-style .card > table,
+  body.appdev-style .card > .overflow-auto {
     margin-left: calc(var(--fd-card-px) * -1);
     margin-right: calc(var(--fd-card-px) * -1);
   }
 
-  body.appdev-style article > table {
+  body.appdev-style article > table,
+  body.appdev-style .card > table {
     width: calc(100% + var(--fd-card-px) * 2);
   }
 
-  body.appdev-style article :is(th, td):first-child {
+  body.appdev-style article :is(th, td):first-child,
+  body.appdev-style .card :is(th, td):first-child {
     padding-left: var(--fd-card-px);
   }
 
-  body.appdev-style article :is(th, td):last-child {
+  body.appdev-style article :is(th, td):last-child,
+  body.appdev-style .card :is(th, td):last-child {
     padding-right: var(--fd-card-px);
   }
 
@@ -762,11 +801,12 @@
        <div data-controller="modal">
          <button data-action="click->modal#open">Open</button>
          <dialog data-modal-target="dialog">
-           <article> ... card content ... </article>
+           <div class="card"> ... card content ... </div>
          </dialog>
        </div>
 
-     The <article> inside picks up the regular card styling;
+     The card inside (<div class="card"> or <article>) picks up the
+     regular card styling;
      these rules handle sizing, the backdrop, the close (X)
      button, and open/close animations driven by the
      modal-is-open/-opening/-closing classes the controller
@@ -791,7 +831,8 @@
     background-color: var(--fd-backdrop);
   }
 
-  body.appdev-style dialog > article {
+  body.appdev-style dialog > article,
+  body.appdev-style dialog > .card {
     margin: 0;
     max-height: calc(100dvh - var(--spacing) * 16);
     overflow-y: auto;
@@ -831,13 +872,15 @@
   /* Action buttons (Close/Cancel/Confirm) that follow other modal
      content get breathing room above them. (Buttons are inline-block,
      so this margin doesn't collapse with the preceding element's.) */
-  body.appdev-style dialog article * + button {
+  body.appdev-style dialog article * + button,
+  body.appdev-style dialog .card * + button {
     margin-top: var(--fd-stack);
   }
 
   /* A full-width content hr reads as a footer divider inside a modal;
      tighten its margins to fit the card */
-  body.appdev-style dialog article hr {
+  body.appdev-style dialog article hr,
+  body.appdev-style dialog .card hr {
     margin: var(--fd-stack) 0;
   }
 
@@ -1380,15 +1423,9 @@
 
   /* --- Cards --- */
 
-  body.appdev-style .card {
-    background-color: var(--fd-surface);
-    border: 1px solid var(--fd-gray-200);
-    border-radius: var(--fd-radius-card);
-    box-shadow: var(--fd-shadow-raised);
-  }
-
-  body.appdev-style .card-body {
-    display: block;
-    padding: var(--fd-card-py) var(--fd-card-px);
-  }
+  /* .card is styled in the CARDS section above, alongside <article>,
+     so there is nothing to add here. It is a complete card on its own:
+     one class, no inner wrapper element. (Note this differs from
+     daisyUI, whose bare .card carries no background, border, padding,
+     or shadow and requires a nested .card-body for padding.) */
 }
