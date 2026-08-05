@@ -22,6 +22,17 @@ Without it, pages get Tailwind's Preflight and utility classes only.
 
 Instead of `@latest` you can pin a release, e.g. `@0.0.1` (the version number from `package.json`).
 
+## Interactive components
+
+Modals, dropdowns, tabs, dismissible alerts, and the dark-mode toggle are styled
+here but need a little JavaScript to actually move. The Stimulus controllers
+that supply it live in [`javascript/controllers/`](javascript/controllers), with
+the markup each one expects documented alongside.
+
+They are **copy-paste examples, not a dependency** — copy the file you need into
+`app/javascript/controllers/` and importmap picks it up automatically. Keep the
+filename: Stimulus derives `data-controller="modal"` from `modal_controller.js`.
+
 ## How it's put together
 
 Two source files in `src/`, one published artifact at the repo root:
@@ -50,5 +61,5 @@ Keeping the script tag and the baked theme on the same minor is what prevents dr
 
 - The gating class is named `appdev-styles` (not `prose`) so [`@tailwindcss/typography`](https://github.com/tailwindlabs/tailwindcss-typography) could be added later without conflict.
 - Selectors are individually prefixed with `body.appdev-styles` rather than wrapped in CSS nesting — nesting desugars selector lists into `:is()`, which takes the max specificity of the list and would break overrides like `.btn-outline` vs the base `button` rule.
-- Dark mode: the stylesheet's surfaces are tokenized, and a `[data-theme="dark"]` block flips the palette when something stamps `data-theme="dark"` on `<html>` (e.g. a Stimulus controller). Tailwind's own `dark:` variant keys off `prefers-color-scheme`; to make it follow the same toggle, a page must also declare `@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));` inside a `<style type="text/tailwindcss">` block.
-- Interactive components (modals, dropdowns, tabs, dismissible alerts) are styled here but need small Stimulus controllers for behavior.
+- Dark mode: the stylesheet's surfaces are tokenized, and a `[data-theme="dark"]` block flips the palette when something stamps `data-theme="dark"` on `<html>` — [`dark_mode_controller.js`](javascript/controllers/dark_mode_controller.js) does that. Tailwind's own `dark:` variant keys off `prefers-color-scheme`; to make it follow the same toggle, a page must also declare `@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));` inside a `<style type="text/tailwindcss">` block.
+- The published artifact is only ever `tailwind.appdev.css` at the repo root. `src/` and `javascript/` are reference material — jsDelivr will happily serve them, but nothing is expected to link them.
