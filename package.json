@@ -1,13 +1,13 @@
 {
-  "name": "tailwind-firstdraft-css",
-  "version": "0.0.4",
-  "description": "Customized Tailwind stylesheet for First Draft projects: classless styles + named components, gated behind body.appdev-style",
+  "name": "tailwind-appdev-css",
+  "version": "0.1.0",
+  "description": "Customized Tailwind stylesheet for First Draft projects: classless styles + named components, gated behind body.appdev-styles",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/firstdraft/tailwind.firstdraft.css.git"
+    "url": "git+https://github.com/firstdraft/tailwind.appdev.css.git"
   },
   "files": [
-    "tailwind.firstdraft.css"
+    "tailwind.appdev.css"
   ],
   "scripts": {
     "build": "bin/build"
@@ -18,12 +18,13 @@
   "keywords": [
     "css",
     "tailwind",
-    "firstdraft"
+    "firstdraft",
+    "appdev"
   ],
   "author": "First Draft",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/firstdraft/tailwind.firstdraft.css/issues"
+    "url": "https://github.com/firstdraft/tailwind.appdev.css/issues"
   },
-  "homepage": "https://github.com/firstdraft/tailwind.firstdraft.css#readme"
+  "homepage": "https://github.com/firstdraft/tailwind.appdev.css#readme"
 }

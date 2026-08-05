@@ -35,8 +35,8 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         run: |
           bin/build
-          git diff --exit-code tailwind.firstdraft.css || {
-            echo "::error::tailwind.firstdraft.css is stale — run bin/build and commit the result before bumping the version"
+          git diff --exit-code tailwind.appdev.css || {
+            echo "::error::tailwind.appdev.css is stale — run bin/build and commit the result before bumping the version"
             exit 1
           }
 
@@ -56,7 +56,7 @@ jobs:
             <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3"></script>
 
             <!-- Tailwind FirstDraft CSS -->
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/firstdraft/tailwind.firstdraft.css@v${{ steps.version.outputs.version }}/tailwind.firstdraft.css">
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/firstdraft/tailwind.appdev.css@v${{ steps.version.outputs.version }}/tailwind.appdev.css">
             ```
           draft: false
           prerelease: false
