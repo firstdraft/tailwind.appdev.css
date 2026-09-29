@@ -1,6 +1,6 @@
 # tailwind.appdev.css
 
-A customized Tailwind stylesheet for your AppDev projects — the successor to [pico.firstdraft.css](https://github.com/firstdraft/pico.firstdraft.css). It provides classless styling for semantic HTML plus Bootstrap-feel named components (`.btn-primary`, `.card`, `.navbar`, `.alert`, ...), all built on Tailwind's default design tokens.
+A customized Tailwind stylesheet for your AppDev projects — the successor to [pico.firstdraft.css](https://github.com/firstdraft/pico.firstdraft.css). It provides classless styling for semantic HTML plus Bootstrap-feel named components (`.btn-primary`, `.btn-danger`, `.card`, `.navbar`, `.alert`, ...), all built on Tailwind's default design tokens.
 
 ## Usage
 

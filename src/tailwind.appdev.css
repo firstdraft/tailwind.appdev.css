@@ -102,6 +102,23 @@
     --fd-success-faint:  var(--color-green-50);
     --fd-success-border: var(--color-green-200);
     --fd-success-text:   var(--color-green-800);
+    --fd-warning:        var(--color-amber-400);
+    --fd-warning-faint:  var(--color-amber-50);
+    --fd-warning-border: var(--color-amber-200);
+    --fd-warning-text:   var(--color-amber-800);
+    --fd-info:           var(--color-sky-600);
+    --fd-info-faint:     var(--color-sky-50);
+    --fd-info-border:    var(--color-sky-200);
+    --fd-info-text:      var(--color-sky-800);
+
+    /* Hover shades for the filled feedback buttons */
+    --fd-danger-hover:  var(--color-red-700);
+    --fd-success-hover: var(--color-green-700);
+    --fd-warning-hover: var(--color-amber-500);
+    --fd-info-hover:    var(--color-sky-700);
+
+    /* Amber is too light to carry white text */
+    --fd-on-warning: var(--color-zinc-900);
 
     /* Modal scrim — always dark, so it does not flip with the theme */
     --fd-backdrop: color-mix(in oklab, var(--color-zinc-900) 60%, transparent);
@@ -1073,6 +1090,87 @@
     color: var(--fd-gray-900);
   }
 
+  /* Feedback colors: go, stop, careful, and by the way */
+  body.appdev-styles .btn-success {
+    background-color: var(--fd-success);
+    color: var(--fd-on-primary);
+  }
+
+  body.appdev-styles .btn-success:hover {
+    background-color: var(--fd-success-hover);
+  }
+
+  body.appdev-styles .btn-danger {
+    background-color: var(--fd-danger);
+    color: var(--fd-on-primary);
+  }
+
+  body.appdev-styles .btn-danger:hover {
+    background-color: var(--fd-danger-hover);
+  }
+
+  body.appdev-styles .btn-warning {
+    background-color: var(--fd-warning);
+    color: var(--fd-on-warning);
+  }
+
+  body.appdev-styles .btn-warning:hover {
+    background-color: var(--fd-warning-hover);
+  }
+
+  body.appdev-styles .btn-info {
+    background-color: var(--fd-info);
+    color: var(--fd-on-primary);
+  }
+
+  body.appdev-styles .btn-info:hover {
+    background-color: var(--fd-info-hover);
+  }
+
+  body.appdev-styles .btn-outline-success {
+    background-color: transparent;
+    color: var(--fd-success);
+    border-color: var(--fd-success);
+  }
+
+  body.appdev-styles .btn-outline-success:hover {
+    background-color: var(--fd-success);
+    color: var(--fd-on-primary);
+  }
+
+  body.appdev-styles .btn-outline-danger {
+    background-color: transparent;
+    color: var(--fd-danger);
+    border-color: var(--fd-danger);
+  }
+
+  body.appdev-styles .btn-outline-danger:hover {
+    background-color: var(--fd-danger);
+    color: var(--fd-on-primary);
+  }
+
+  body.appdev-styles .btn-outline-warning {
+    background-color: transparent;
+    color: var(--fd-warning-text);
+    border-color: var(--fd-warning);
+  }
+
+  body.appdev-styles .btn-outline-warning:hover {
+    background-color: var(--fd-warning);
+    color: var(--fd-on-warning);
+  }
+
+  body.appdev-styles .btn-outline-info {
+    background-color: transparent;
+    color: var(--fd-info);
+    border-color: var(--fd-info);
+  }
+
+  body.appdev-styles .btn-outline-info:hover {
+    background-color: var(--fd-info);
+    color: var(--fd-on-primary);
+  }
+
   /* Link-styled buttons (icon buttons, inline actions) */
   body.appdev-styles .btn-link {
     background-color: transparent;
@@ -1113,6 +1211,18 @@
   body.appdev-styles .btn-close:hover {
     background-color: var(--fd-gray-200);
     color: var(--fd-gray-900);
+  }
+
+  /* Sizes. These come after every other button rule so that they
+     also resize .btn-link, which sets its own padding */
+  body.appdev-styles .btn-sm {
+    padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
+    font-size: var(--text-sm);
+  }
+
+  body.appdev-styles .btn-lg {
+    padding: calc(var(--spacing) * 3) calc(var(--spacing) * 6);
+    font-size: var(--text-lg);
   }
 
   /* Buttons with explicit component classes size to their content;
@@ -1205,6 +1315,18 @@
     background-color: var(--fd-danger-faint);
     border-color: var(--fd-danger-border);
     color: var(--fd-danger-text);
+  }
+
+  body.appdev-styles .alert-warning {
+    background-color: var(--fd-warning-faint);
+    border-color: var(--fd-warning-border);
+    color: var(--fd-warning-text);
+  }
+
+  body.appdev-styles .alert-info {
+    background-color: var(--fd-info-faint);
+    border-color: var(--fd-info-border);
+    color: var(--fd-info-text);
   }
 
   body.appdev-styles .alert-dismissible {
